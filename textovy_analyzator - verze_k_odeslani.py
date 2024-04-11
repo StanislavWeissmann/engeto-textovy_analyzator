@@ -33,13 +33,12 @@ in modern oceans. Other fish such as paddlefish,
 garpike and stingray are also present.'''
 ]
 
-print ("Enter username:")
-prihlasovaci_jmeno = input()
-print ("Enter password:")
-heslo = input()
+#import knihovny pro sys.exit
+import sys
 
-print()
-print("$ python projekt1.py")
+print("\n$ python projekt1.py")
+prihlasovaci_jmeno = input("\nEnter username: ")
+heslo = input("Enter password: ")
 
 # slovník uživatelů s hesly
 uzivatele = {"bob" : "123", "ann" : "pass123", "mike" : "password123", 
@@ -47,103 +46,83 @@ uzivatele = {"bob" : "123", "ann" : "pass123", "mike" : "password123",
 
 # kontrola uživatelů a hesel s přivítáním
 if uzivatele.get(prihlasovaci_jmeno) == heslo:   
-    print("username:", prihlasovaci_jmeno) 
-    print("password:", heslo)
     print("-" * 40)
     print("Welcome to the app,", prihlasovaci_jmeno)
     print("We have 3 texts to be analyzed.")
     print("-" * 40)
 
 else:
-    print("username:", prihlasovaci_jmeno)
-    print("password:", heslo) 
     print("unregistered user, terminating the program..")
-    exit() 
+    sys.exit()
 
 # vložení čísla textu a kontrola
-print ("Enter a number btw. 1 and 3 to select:")
-cislo_textu = input()
+cislo_textu = input("Enter a number btw. 1 and 3 to select: ")
 print("-" * 40)
 if not cislo_textu.isdigit():
     print("You did not enter a number.")
-    exit()
-if cislo_textu != "1" and cislo_textu != "2" and cislo_textu != "3":
+    sys.exit()
+if int(cislo_textu) not in range(0,4):
     print("Invalid number.")
-    exit()
+    sys.exit()
 
 # převod str na int z outputu... pořadí textu o 1 méně než číslo textu
 poradi_textu = int(cislo_textu) - 1
 
-# proměnné pro 1. polovinu úkolu
-vyskyt_slov_s_velkym = 0
-vyskyt_slov_jen_velka = 0
-vyskyt_slov_jen_mala = 0
-vyskyt_slov_jen_numeric = 0
-soucet_cisel = 0
+# proměnné pro 1. polovinu úkolu v dict vyskyty
+vyskyty = {"slova_s_velkym" : 0, "slova_jen_velka" : 0, 
+           "slova_jen_mala" : 0, "slova_jen_numeric" : 0, "soucet_cisel" : 0}
 
-# slovník pro klíč - délka slova, hodnota - počet slov o dané délce
-dict = {}
+# slovník pro klíč=délka slova, hodnota=počet slov o dané délce
+analyzovane_delky = {}
 
-# vytvoření listu "prevod" z listu TEXTS - pouze zvolený text 
+# vytvoření listu "zvoleny_text" z listu TEXTS - pouze zvolený text 
 # a jednotlivé prvky jsou slova (i s tečkou a čárkou...) 
-prevod = TEXTS[poradi_textu].split() 
+zvoleny_text = TEXTS[poradi_textu].split() 
 
-# cyklus v novém listu: naplnění proměnných, proměnná a bude vždy obsahovat
+# přiřazení hodnot ke klíčům ve vyskyty, proměnná "a" bude vždy obsahovat
 # slovo z listu, proměnná W - převod čísla v textu na typ int.
-# proměnná součet čísel počítá součet čísel v textu
-for a in prevod:
+# proměnná součet čísel počítá součet čísel v textu 
+for a in zvoleny_text:
     if a.istitle():
-        vyskyt_slov_s_velkym = vyskyt_slov_s_velkym + 1
+        vyskyty["slova_s_velkym"] = vyskyty.get("slova_s_velkym", 0) + 1
     if a.isupper() and a.isalpha():
-        vyskyt_slov_jen_velka = vyskyt_slov_jen_velka + 1
+        vyskyty["slova_jen_velka"] = vyskyty.get("slova_jen_velka", 0) + 1
     if a.islower():
-        vyskyt_slov_jen_mala = vyskyt_slov_jen_mala + 1
+        vyskyty["slova_jen_mala"] = vyskyty.get("slova_jen_mala", 0) + 1
     if a.isnumeric():
-        vyskyt_slov_jen_numeric = vyskyt_slov_jen_numeric + 1
+        vyskyty["slova_jen_numeric"] = vyskyty.get("slova_jen_numeric", 0) + 1
         w = int(a)
-        soucet_cisel = soucet_cisel + w
+        vyskyty["soucet_cisel"] = vyskyty.get("soucet_cisel", 0) + w
 
-# podmínka s kontrol. - jestliže slovo obsahuje . nebo , pak se délka slova 
+# podmínka - jestliže slovo obsahuje "." nebo ",", pak se délka slova 
 # upravuje o -1, jinak je upravená délka totožná se skutečnou délkou
-    if "." in a:
+    if "." in a or "," in a:
         upravena_delka = len(a) - 1
-    elif "," in a:
-        upravena_delka = len(a) - 1     
     else:
         upravena_delka = len(a)
 
-# naplnění dict - podmínka, jestliže klíč, tj. upravená délka slova je v dict, 
-# tak se hodnota zvýší o 1, pokud není v dict klíč, tak se vytvoří s hodnotou 
-    if upravena_delka in dict.keys():
-        dict [upravena_delka] = dict [upravena_delka] +1
-    else:
-        dict [upravena_delka] = 1 
-
-# keys je list s klíči v dict (velikost slov), pak setřídění klíčů v sort_keys
-keys = dict.keys() 
-sort_keys = sorted(keys)
-
-# vytvoření upraveného dict a v cyklu přiřazení hodnot setříděným klíčům
-upraveny_dict = {}
-for a in sort_keys:
-    upraveny_dict [a] = dict [a]  
+# naplnění analyzovane_delky - upravené délky(velikosti slov) 
+# a jejich výskyty (ještě pořád v cyklu pro každé slovo ze zvoleného textu)
+    analyzovane_delky[upravena_delka] = analyzovane_delky.get(upravena_delka,0) +1
+# a setřídění do nového dict
+nove_analyzovane_delky = dict(sorted(analyzovane_delky.items()))
   
 # tisky výsledků    
-print ("There are", len(prevod), "words in the selected text.")
-print("There are", vyskyt_slov_s_velkym, "titlecase words.")
-print("There are", vyskyt_slov_jen_velka, "uppercase words.")
-print("There are", vyskyt_slov_jen_mala, "lowercase words.")
-print ("There are", vyskyt_slov_jen_numeric, "numeric strings.")
-print ("The sum of all the numbers", soucet_cisel)
+print ("There are", len(zvoleny_text), "words in the selected text.")
+print("There are", vyskyty.get("slova_s_velkym"), "titlecase words.")
+print("There are", vyskyty.get("slova_jen_velka"), "uppercase words.")
+print("There are", vyskyty.get("slova_jen_mala"), "lowercase words.")
+print ("There are", vyskyty.get("slova_jen_numeric"), "numeric strings.")
+print ("The sum of all the numbers", vyskyty.get("soucet_cisel"))
 
 print("-" *40)
 print("LEN|       OCCURENCES      |NR.")
 print("-" *40)
 
-for a in upraveny_dict:
+for a in nove_analyzovane_delky:
     if a < 10:
-        print("", a, "|", "*" * upraveny_dict [a], 
-              " " * (20-upraveny_dict [a]), "|", upraveny_dict [a])
+        print("", a, "|", "*" * nove_analyzovane_delky[a], 
+              " " * (20-nove_analyzovane_delky[a]), "|", nove_analyzovane_delky[a])
     else:
-        print(a, "|", "*" * upraveny_dict [a], 
-              " " * (20-upraveny_dict [a]), "|", upraveny_dict [a])
+        print(a, "|", "*" * nove_analyzovane_delky[a], 
+              " " * (20-nove_analyzovane_delky[a]), "|", nove_analyzovane_delky[a])
